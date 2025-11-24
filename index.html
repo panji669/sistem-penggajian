@@ -5,14 +5,10 @@
 <title>Sistem Payroll Enterprise</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- icons -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-<!-- pdf export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 
 <style>
-
 :root{
     --bg: #0b1220;
     --bg2: #111827;
@@ -22,8 +18,6 @@
     --line: rgba(255,255,255,0.1);
     --accent: #2563eb;
 }
-
-/* theme light */
 [data-theme="light"]{
     --bg: #f6f7fb;
     --bg2: #ffffff;
@@ -33,7 +27,6 @@
     --line: #d1d5db;
     --accent: #1d4ed8;
 }
-
 body{
     margin:0;
     background:var(--bg);
@@ -41,7 +34,26 @@ body{
     color:var(--text);
 }
 
-/* top */
+/* ===== LOGIN PAGE (simple, still same theme) ===== */
+.login-wrap{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+.login-box{
+    width:100%;
+    max-width:380px;
+    background:var(--bg2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px;
+}
+.login-box h2{margin-top:0}
+.login-box .small{color:var(--muted);font-size:13px}
+
+/* topbar */
 .topbar{
     height:58px;
     display:flex;
@@ -213,190 +225,229 @@ select option{
 }
 </style>
 </head>
-<body>
 
-<!-- =========================================================
-     TOP BAR
-     ========================================================= -->
-<div class="topbar">
-    <div style="display:flex;align-items:center;gap:6px;">
-        <i class="bi bi-building" style="color:var(--accent);font-size:20px;"></i>
-        <b>Sistem Payroll Enterprise</b>
-    </div>
+<body data-theme="dark">
 
-    <div style="display:flex;gap:6px;">
-        <button class="top-action-btn" onclick="toggleSidebar()"><i class="bi bi-layout-sidebar"></i></button>
-        <button class="top-action-btn" onclick="switchTheme()"><i class="bi bi-moon-stars"></i></button>
-        <button class="top-action-btn" onclick="resetAll()"><i class="bi bi-trash"></i></button>
-    </div>
+<!-- ==========================
+     LOGIN PAGE (FLOW STEP 1)
+=========================== -->
+<div id="loginPage" class="login-wrap">
+  <div class="login-box">
+    <h2>Login Penggajian</h2>
+    <div class="small">Admin / HRD masuk pakai akun default</div>
+    <br>
+    <label>Username</label>
+    <input id="lgUser" placeholder="admin">
+    <label>Password</label>
+    <input id="lgPass" type="password" placeholder="admin123">
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doLogin()">Login</button>
+    <p class="small" style="margin-top:10px">
+      Default akun: <b>admin / admin123</b>
+    </p>
+  </div>
 </div>
 
-<!-- =========================================================
-     SIDEBAR
-     ========================================================= -->
-<div class="sidebar" id="sideMenu">
-    <button class="menu-btn active" data-pg="dash" onclick="openPage('dash')">
-        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
-    </button>
-    <button class="menu-btn" data-pg="emp" onclick="openPage('emp')">
-        <i class="bi bi-people"></i><span>Karyawan</span>
-    </button>
-    <button class="menu-btn" data-pg="grade" onclick="openPage('grade')">
-        <i class="bi bi-layers"></i><span>Grade / Level</span>
-    </button>
-    <button class="menu-btn" data-pg="att" onclick="openPage('att')">
-        <i class="bi bi-calendar-check"></i><span>Absensi</span>
-    </button>
-    <button class="menu-btn" data-pg="pay" onclick="openPage('pay')">
-        <i class="bi bi-cash-stack"></i><span>Payroll</span>
-    </button>
-    <button class="menu-btn" data-pg="rep" onclick="openPage('rep')">
-        <i class="bi bi-file-text"></i><span>Reports</span>
-    </button>
-</div>
 
-<!-- =========================================================
-     CONTENT
-     ========================================================= -->
-<div class="content">
+<!-- ==========================
+     MAIN APP (FLOW STEP 2+)
+=========================== -->
+<div id="appPage" style="display:none;">
 
-    <!-- DASHBOARD -->
-    <div id="page_dash" class="page-box">
-        <h2>Dashboard</h2>
-        <div class="grid grid-3">
-            <div class="card">
-                <div class="muted">Total Karyawan</div>
-                <h1 id="statEmp">0</h1>
-            </div>
-            <div class="card">
-                <div class="muted">Total Grade</div>
-                <h1 id="statGrade">0</h1>
-            </div>
-            <div class="card">
-                <div class="muted">Slip Bulan Ini</div>
-                <h1 id="statSlip">0</h1>
-            </div>
-        </div>
-    </div>
+  <!-- TOP BAR -->
+  <div class="topbar">
+      <div style="display:flex;align-items:center;gap:6px;">
+          <i class="bi bi-building" style="color:var(--accent);font-size:20px;"></i>
+          <b>Sistem Payroll Enterprise</b>
+      </div>
 
-    <!-- KARYAWAN -->
-    <div id="page_emp" class="page-box" style="display:none;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-            <h2>Data Karyawan</h2>
-            <button class="btn-primary" onclick="openEmpModal()">+ Karyawan</button>
-        </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+          <span id="whoLogin" style="color:var(--muted);font-size:13px;"></span>
+          <button class="top-action-btn" onclick="toggleSidebar()"><i class="bi bi-layout-sidebar"></i></button>
+          <button class="top-action-btn" onclick="switchTheme()"><i class="bi bi-moon-stars"></i></button>
+          <button class="top-action-btn" onclick="doLogout()"><i class="bi bi-box-arrow-right"></i></button>
+      </div>
+  </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>NIP</th><th>Nama</th><th>Dept</th><th>Posisi</th><th>Grade</th><th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="empList"></tbody>
-        </table>
-    </div>
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sideMenu">
+      <button class="menu-btn active" data-pg="dash" onclick="openPage('dash')">
+          <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+      </button>
+      <button class="menu-btn" data-pg="emp" onclick="openPage('emp')">
+          <i class="bi bi-people"></i><span>Data Karyawan</span>
+      </button>
+      <button class="menu-btn" data-pg="grade" onclick="openPage('grade')">
+          <i class="bi bi-person-badge"></i><span>Data Jabatan</span>
+      </button>
+      <button class="menu-btn" data-pg="att" onclick="openPage('att')">
+          <i class="bi bi-calendar-check"></i><span>Absensi</span>
+      </button>
+      <button class="menu-btn" data-pg="pay" onclick="openPage('pay')">
+          <i class="bi bi-cash-stack"></i><span>Penggajian</span>
+      </button>
+      <button class="menu-btn" data-pg="slip" onclick="openPage('slip')">
+          <i class="bi bi-receipt-cutoff"></i><span>Slip Gaji</span>
+      </button>
+      <button class="menu-btn" data-pg="rep" onclick="openPage('rep')">
+          <i class="bi bi-file-text"></i><span>Laporan</span>
+      </button>
+  </div>
 
-    <!-- GRADE -->
-    <div id="page_grade" class="page-box" style="display:none;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-            <h2>Data Grade</h2>
-            <button class="btn-primary" onclick="openGradeModal()">+ Grade</button>
-        </div>
+  <!-- CONTENT -->
+  <div class="content">
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Grade</th><th>Gaji Pokok</th><th>Tunj. Posisi</th><th>OT Rate</th><th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="gradeList"></tbody>
-        </table>
-    </div>
+      <!-- DASHBOARD (STEP 2) -->
+      <div id="page_dash" class="page-box">
+          <h2>Dashboard</h2>
+          <div class="grid grid-3">
+              <div class="card">
+                  <div style="color:var(--muted)">Total Karyawan</div>
+                  <h1 id="statEmp">0</h1>
+              </div>
+              <div class="card">
+                  <div style="color:var(--muted)">Total Jabatan/Grade</div>
+                  <h1 id="statGrade">0</h1>
+              </div>
+              <div class="card">
+                  <div style="color:var(--muted)">Slip Gaji Bulan Ini</div>
+                  <h1 id="statSlip">0</h1>
+              </div>
+          </div>
+      </div>
 
-    <!-- ABSENSI -->
-    <div id="page_att" class="page-box" style="display:none;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-            <h2>Absensi</h2>
-            <button class="btn-primary" onclick="openAttModal()">+ Absensi</button>
-        </div>
+      <!-- DATA KARYAWAN (STEP 3) -->
+      <div id="page_emp" class="page-box" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+              <h2>Data Karyawan</h2>
+              <button class="btn-primary" onclick="openEmpModal()">+ Karyawan</button>
+          </div>
+          <table>
+              <thead>
+                  <tr>
+                      <th>NIP</th><th>Nama</th><th>Dept</th><th>Posisi</th><th>Jabatan</th><th>Aksi</th>
+                  </tr>
+              </thead>
+              <tbody id="empList"></tbody>
+          </table>
+      </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Tanggal</th><th>Karyawan</th><th>Status</th><th>Telat</th><th>OT</th><th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="attList"></tbody>
-        </table>
-    </div>
+      <!-- DATA JABATAN / GRADE (STEP 4) -->
+      <div id="page_grade" class="page-box" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+              <h2>Data Jabatan</h2>
+              <button class="btn-primary" onclick="openGradeModal()">+ Jabatan</button>
+          </div>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Jabatan/Grade</th><th>Gaji Pokok</th><th>Tunj. Jabatan</th><th>Rate Lembur/Jam</th><th>Aksi</th>
+                  </tr>
+              </thead>
+              <tbody id="gradeList"></tbody>
+          </table>
+      </div>
 
-    <!-- PAYROLL -->
-    <div id="page_pay" class="page-box" style="display:none;">
-        <h2>Payroll</h2>
+      <!-- ABSENSI (STEP 5) -->
+      <div id="page_att" class="page-box" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+              <h2>Absensi</h2>
+              <button class="btn-primary" onclick="openAttModal()">+ Absensi</button>
+          </div>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Tanggal</th><th>Karyawan</th><th>Status</th><th>Telat (menit)</th><th>Lembur (jam)</th><th>Aksi</th>
+                  </tr>
+              </thead>
+              <tbody id="attList"></tbody>
+          </table>
+      </div>
 
-        <div class="card grid grid-2">
-            <div>
-                <label>Pilih Karyawan</label>
-                <select id="payEmpSelect"></select>
-            </div>
-            <div>
-                <label>Bulan</label>
-                <input type="month" id="payMonth">
-            </div>
-            <div>
-                <label>Transport</label>
-                <input id="payTransport" type="number" value="300000">
-            </div>
-            <div>
-                <label>Uang Makan</label>
-                <input id="payMeal" type="number" value="400000">
-            </div>
-            <div>
-                <label>Tunj. Kehadiran</label>
-                <input id="payAtt" type="number" value="250000">
-            </div>
-            <div>
-                <label>Tunjangan Lain</label>
-                <input id="payOtherAllow" type="number" value="0">
-            </div>
-            <div>
-                <label>Potongan Lain</label>
-                <input id="payOtherDed" type="number" value="0">
-            </div>
+      <!-- PENGGAJIAN (STEP 6) -->
+      <div id="page_pay" class="page-box" style="display:none;">
+          <h2>Penggajian (Hitung Otomatis)</h2>
 
-            <div style="display:flex;align-items:flex-end;">
-                <button class="btn-primary" onclick="runPayroll()">Proses</button>
-            </div>
-        </div>
+          <div class="card grid grid-2">
+              <div>
+                  <label>Pilih Karyawan</label>
+                  <select id="payEmpSelect"></select>
+              </div>
+              <div>
+                  <label>Bulan</label>
+                  <input type="month" id="payMonth">
+              </div>
+              <div>
+                  <label>Tunj. Transport</label>
+                  <input id="payTransport" type="number" value="300000">
+              </div>
+              <div>
+                  <label>Tunj. Makan</label>
+                  <input id="payMeal" type="number" value="400000">
+              </div>
+              <div>
+                  <label>Tunj. Kehadiran</label>
+                  <input id="payAtt" type="number" value="250000">
+              </div>
+              <div>
+                  <label>Tunjangan Lain</label>
+                  <input id="payOtherAllow" type="number" value="0">
+              </div>
+              <div>
+                  <label>Potongan Lain</label>
+                  <input id="payOtherDed" type="number" value="0">
+              </div>
 
-        <div class="card" id="slipCard" style="display:none;">
+              <div style="display:flex;align-items:flex-end;">
+                  <button class="btn-primary" onclick="runPayroll()">Hitung Gaji</button>
+              </div>
+          </div>
+
+          <div class="card" id="payPreviewCard" style="display:none;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <h3>Preview Slip (sementara)</h3>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn-soft" onclick="saveSlip()">Simpan Slip</button>
+                  <button class="btn-primary" onclick="exportSlip()">Export PDF</button>
+                </div>
+              </div>
+              <div id="slipBox" class="slip"></div>
+          </div>
+      </div>
+
+      <!-- SLIP GAJI (STEP 7) -->
+      <div id="page_slip" class="page-box" style="display:none;">
+          <h2>Slip Gaji</h2>
+          <div class="card">
+            <label>Pilih slip untuk dilihat / cetak</label>
+            <select id="slipSelect" onchange="viewSlipFromList()"></select>
+          </div>
+          <div class="card" id="slipViewCard" style="display:none;">
             <div style="display:flex;justify-content:space-between;">
-                <h3>Slip Gaji</h3>
-                <button class="btn-primary" onclick="exportSlip()">Export PDF</button>
+              <h3>Detail Slip</h3>
+              <button class="btn-primary" onclick="exportSlip()">Export PDF</button>
             </div>
-            <div id="slipBox" class="slip"></div>
-        </div>
-    </div>
+            <div id="slipViewBox" class="slip"></div>
+          </div>
+      </div>
 
-    <!-- REPORT -->
-    <div id="page_rep" class="page-box" style="display:none;">
-        <h2>Reports</h2>
+      <!-- LAPORAN (STEP 8) -->
+      <div id="page_rep" class="page-box" style="display:none;">
+          <h2>Laporan Penggajian</h2>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Bulan</th><th>Karyawan</th><th>Gross</th><th>Potongan</th><th>Take Home</th>
+                  </tr>
+              </thead>
+              <tbody id="repList"></tbody>
+          </table>
+      </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Bulan</th><th>Karyawan</th><th>Gross</th><th>Potongan</th><th>Take Home</th>
-                </tr>
-            </thead>
-            <tbody id="repList"></tbody>
-        </table>
-    </div>
-
+  </div>
 </div>
 
-<!-- =========================================================
-     MODAL KARYAWAN
-     ========================================================= -->
+
+<!-- ========= MODAL KARYAWAN ========= -->
 <div class="modal-bg" id="empModal">
     <div class="modal-box">
         <h3 id="empModalTitle">Tambah Karyawan</h3>
@@ -404,7 +455,7 @@ select option{
         <label>Nama</label><input id="empName">
         <label>Departemen</label><input id="empDept">
         <label>Posisi</label><input id="empPos">
-        <label>Grade</label><select id="empGrade"></select>
+        <label>Jabatan/Grade</label><select id="empGrade"></select>
         <div style="display:flex;justify-content:flex-end;margin-top:10px;gap:6px;">
             <button class="btn-soft" onclick="closeEmpModal()">Batal</button>
             <button class="btn-primary" onclick="saveEmp()">Simpan</button>
@@ -412,16 +463,14 @@ select option{
     </div>
 </div>
 
-<!-- =========================================================
-     MODAL GRADE
-     ========================================================= -->
+<!-- ========= MODAL JABATAN/GRADE ========= -->
 <div class="modal-bg" id="gradeModal">
     <div class="modal-box">
-        <h3 id="gradeModalTitle">Tambah Grade</h3>
-        <label>Nama Grade</label><input id="grName">
+        <h3 id="gradeModalTitle">Tambah Jabatan</h3>
+        <label>Nama Jabatan/Grade</label><input id="grName">
         <label>Gaji Pokok</label><input id="grBasic" type="number">
-        <label>Tunj. Posisi</label><input id="grPosAllow" type="number">
-        <label>OT Rate</label><input id="grOt" type="number">
+        <label>Tunj. Jabatan</label><input id="grPosAllow" type="number">
+        <label>Rate Lembur / Jam</label><input id="grOt" type="number">
 
         <div style="display:flex;justify-content:flex-end;margin-top:10px;gap:6px;">
             <button class="btn-soft" onclick="closeGradeModal()">Batal</button>
@@ -430,9 +479,7 @@ select option{
     </div>
 </div>
 
-<!-- =========================================================
-     MODAL ABSENSI
-     ========================================================= -->
+<!-- ========= MODAL ABSENSI ========= -->
 <div class="modal-bg" id="attModal">
     <div class="modal-box">
         <h3>Input Absensi</h3>
@@ -454,27 +501,64 @@ select option{
     </div>
 </div>
 
-<!-- =========================================================
-     SCRIPT 
-     ========================================================= -->
+
 <script>
+// ===============================
+// LOGIN LOGIC (STEP 1 + 9)
+// ===============================
+const defaultUser = { user:"admin", pass:"admin123", role:"admin" };
 
-// data dasar
-let dataEmp = JSON.parse(localStorage.getItem("empData") || "[]");
+function doLogin(){
+  const u = lgUser.value.trim();
+  const p = lgPass.value.trim();
+
+  if(u === defaultUser.user && p === defaultUser.pass){
+    sessionStorage.setItem("isLogin","1");
+    sessionStorage.setItem("loginUser", u);
+    loginPage.style.display="none";
+    appPage.style.display="block";
+    whoLogin.textContent = `${u} (${defaultUser.role})`;
+    renderAll();
+  }else{
+    alert("Username / password salah");
+  }
+}
+
+function doLogout(){
+  if(!confirm("Logout sekarang?")) return;
+  sessionStorage.removeItem("isLogin");
+  sessionStorage.removeItem("loginUser");
+  appPage.style.display="none";
+  loginPage.style.display="flex";
+}
+
+// auto check login
+(function(){
+  if(sessionStorage.getItem("isLogin")==="1"){
+    loginPage.style.display="none";
+    appPage.style.display="block";
+    whoLogin.textContent = sessionStorage.getItem("loginUser") || "admin";
+  }
+})();
+
+
+// ===============================
+// DATA STORAGE
+// ===============================
+let dataEmp   = JSON.parse(localStorage.getItem("empData")   || "[]");
 let dataGrade = JSON.parse(localStorage.getItem("gradeData") || "[]");
-let dataAtt = JSON.parse(localStorage.getItem("attData") || "[]");
-let dataSlip = JSON.parse(localStorage.getItem("slipData") || "[]");
+let dataAtt   = JSON.parse(localStorage.getItem("attData")   || "[]");
+let dataSlip  = JSON.parse(localStorage.getItem("slipData")  || "[]");
 
-// default grades, kalau kosong
+// default jabatan kalau kosong
 if(dataGrade.length === 0){
     dataGrade = [
         {name:"G1", basic:6000000, pos:1500000, ot:40000},
         {name:"G2", basic:4500000, pos:1000000, ot:30000},
-        {name:"G3", basic:3500000, pos:700000, ot:25000}
+        {name:"G3", basic:3500000, pos:700000,  ot:25000}
     ];
 }
 
-// save helper
 function saveAll(){
     localStorage.setItem("empData", JSON.stringify(dataEmp));
     localStorage.setItem("gradeData", JSON.stringify(dataGrade));
@@ -482,44 +566,38 @@ function saveAll(){
     localStorage.setItem("slipData", JSON.stringify(dataSlip));
 }
 
-// toggle sidebar
+// ===============================
+// UI BASIC
+// ===============================
 function toggleSidebar(){
     document.getElementById("sideMenu").classList.toggle("collapsed");
 }
-
-// theme switch
 function switchTheme(){
     let th = document.body.getAttribute("data-theme");
     document.body.setAttribute("data-theme", th === "light" ? "dark" : "light");
 }
 
-// reset system
-function resetAll(){
-    if(!confirm("Reset semua data?")) return;
-    localStorage.clear();
-    location.reload();
-}
-
-// ==================== PAGE =====================
+// ===============================
+// PAGE NAV
+// ===============================
 function openPage(pg){
     document.querySelectorAll(".menu-btn").forEach(btn=>{
         btn.classList.remove("active");
-        if(btn.getAttribute("data-pg") === pg){ btn.classList.add("active"); }
+        if(btn.getAttribute("data-pg") === pg) btn.classList.add("active");
     });
-
     document.querySelectorAll(".page-box").forEach(p=>p.style.display="none");
     document.getElementById("page_"+pg).style.display="block";
-
-    // update dashboard saat buka halaman lain
     renderAll();
 }
 
-// ==================== UTIL =====================
+// ===============================
+// UTIL
+// ===============================
 function rupiah(x){ return "Rp"+(x||0).toLocaleString("id-ID"); }
 
-// =================================================
-//   RENDERING
-// =================================================
+// ===============================
+// RENDER ALL (Dashboard, menus)
+// ===============================
 function renderAll(){
     renderDashboard();
     renderGrade();
@@ -527,6 +605,7 @@ function renderAll(){
     renderAbsensi();
     renderReports();
     fillPayrollSelect();
+    fillSlipSelect();
 }
 
 function renderDashboard(){
@@ -538,7 +617,7 @@ function renderDashboard(){
     statSlip.textContent = cnt;
 }
 
-// GRADE list
+// render jabatan
 function renderGrade(){
     gradeList.innerHTML = "";
     dataGrade.forEach((g,i)=>{
@@ -556,14 +635,14 @@ function renderGrade(){
         `;
     });
 
-    // fill select grade
+    // select jabatan di modal karyawan
     empGrade.innerHTML = "";
     dataGrade.forEach(g=>{
         empGrade.innerHTML += `<option value="${g.name}">${g.name}</option>`;
     });
 }
 
-// EMPLOYEES list
+// render karyawan
 function renderEmp(){
     empList.innerHTML = "";
     dataEmp.forEach((e,i)=>{
@@ -583,7 +662,7 @@ function renderEmp(){
     });
 }
 
-// ABSENSI
+// render absensi
 function renderAbsensi(){
     attList.innerHTML = "";
     dataAtt.forEach((a,i)=>{
@@ -595,15 +674,13 @@ function renderAbsensi(){
                 <td>${a.sts}</td>
                 <td>${a.late}</td>
                 <td>${a.ot}</td>
-                <td>
-                    <button class="btn-danger" onclick="delAtt(${i})">X</button>
-                </td>
+                <td><button class="btn-danger" onclick="delAtt(${i})">X</button></td>
             </tr>
         `;
     });
 }
 
-// REPORT
+// render laporan gaji
 function renderReports(){
     repList.innerHTML = "";
     dataSlip.forEach((s,i)=>{
@@ -619,7 +696,7 @@ function renderReports(){
     });
 }
 
-// payroll dropdown
+// select payroll
 function fillPayrollSelect(){
     payEmpSelect.innerHTML = "";
     dataEmp.forEach(e=>{
@@ -627,14 +704,26 @@ function fillPayrollSelect(){
     });
 }
 
-// =================================================
-//   KARYAWAN
-// =================================================
+// select slip list
+function fillSlipSelect(){
+  slipSelect.innerHTML = "";
+  if(dataSlip.length===0){
+    slipSelect.innerHTML = `<option value="">Belum ada slip</option>`;
+    slipViewCard.style.display="none";
+    return;
+  }
+  dataSlip.forEach((s,i)=>{
+    slipSelect.innerHTML += `<option value="${i}">${s.month} - ${s.nama} (${s.nip})</option>`;
+  });
+}
+
+// ===============================
+// KARYAWAN CRUD
+// ===============================
 let editEmpIdx = null;
 
 function openEmpModal(i=null){
-    document.getElementById("empModal").style.display="flex";
-
+    empModal.style.display="flex";
     editEmpIdx = i;
 
     if(i===null){
@@ -652,30 +741,27 @@ function openEmpModal(i=null){
         empGrade.value=e.grade;
     }
 }
-
-function closeEmpModal(){
-    empModal.style.display="none";
-}
+function closeEmpModal(){ empModal.style.display="none"; }
 
 function saveEmp(){
     let obj = {
-        nip:empNip.value,
-        nama:empName.value,
-        dept:empDept.value,
-        pos:empPos.value,
+        nip:empNip.value.trim(),
+        nama:empName.value.trim(),
+        dept:empDept.value.trim(),
+        pos:empPos.value.trim(),
         grade:empGrade.value
     };
+    if(!obj.nip || !obj.nama) return alert("Lengkapi data!");
 
-    if(!obj.nip || !obj.nama) return alert("Lengkapi data");
+    // cek nip double
+    let doubleNip = dataEmp.find((x,idx)=>x.nip===obj.nip && idx!==editEmpIdx);
+    if(doubleNip) return alert("NIP sudah ada!");
 
     if(editEmpIdx===null) dataEmp.push(obj);
-    else dataEmp[editEmpIdx] = obj;
+    else dataEmp[editEmpIdx]=obj;
 
-    saveAll();
-    closeEmpModal();
-    renderAll();
+    saveAll(); closeEmpModal(); renderAll();
 }
-
 function editEmp(i){ openEmpModal(i); }
 function delEmp(i){
     if(!confirm("Hapus karyawan?")) return;
@@ -683,186 +769,229 @@ function delEmp(i){
     saveAll(); renderAll();
 }
 
-// =================================================
-//   GRADE
-// =================================================
+// ===============================
+// JABATAN/GRADE CRUD
+// ===============================
 let editGradeIdx = null;
 
 function openGradeModal(i=null){
-    document.getElementById("gradeModal").style.display="flex";
-    editGradeIdx = i;
+    gradeModal.style.display="flex";
+    editGradeIdx=i;
 
     if(i===null){
-        gradeModalTitle.textContent="Tambah Grade";
+        gradeModalTitle.textContent="Tambah Jabatan";
         grName.value=""; grBasic.value="";
         grPosAllow.value=""; grOt.value="";
     }else{
-        let g = dataGrade[i];
-        gradeModalTitle.textContent="Edit Grade";
+        let g=dataGrade[i];
+        gradeModalTitle.textContent="Edit Jabatan";
         grName.value=g.name;
         grBasic.value=g.basic;
         grPosAllow.value=g.pos;
         grOt.value=g.ot;
     }
 }
-
-function closeGradeModal(){
-    gradeModal.style.display="none";
-}
+function closeGradeModal(){ gradeModal.style.display="none"; }
 
 function saveGrade(){
     let g={
-        name:grName.value,
+        name:grName.value.trim(),
         basic:Number(grBasic.value||0),
         pos:Number(grPosAllow.value||0),
         ot:Number(grOt.value||0)
     };
+    if(!g.name) return alert("Nama jabatan wajib!");
 
-    if(!g.name) return alert("Nama grade wajib");
+    let double = dataGrade.find((x,idx)=>x.name===g.name && idx!==editGradeIdx);
+    if(double) return alert("Jabatan sudah ada!");
 
     if(editGradeIdx===null) dataGrade.push(g);
-    else dataGrade[editGradeIdx] = g;
+    else dataGrade[editGradeIdx]=g;
 
-    saveAll();
-    closeGradeModal();
-    renderAll();
+    saveAll(); closeGradeModal(); renderAll();
 }
-
 function editGrade(i){ openGradeModal(i); }
 function delGrade(i){
-    if(!confirm("Hapus grade?")) return;
+    if(!confirm("Hapus jabatan?")) return;
     dataGrade.splice(i,1);
     saveAll(); renderAll();
 }
 
-// =================================================
-//   ABSENSI
-// =================================================
+// ===============================
+// ABSENSI CRUD
+// ===============================
 function openAttModal(){
     attModal.style.display="flex";
-
     attDate.valueAsDate = new Date();
 
     attEmp.innerHTML="";
     dataEmp.forEach(e=>{
-        attEmp.innerHTML+=`<option value="${e.nip}">${e.nama}</option>`;
+        attEmp.innerHTML += `<option value="${e.nip}">${e.nama}</option>`;
     });
 }
-
-function closeAttModal(){
-    attModal.style.display="none";
-}
+function closeAttModal(){ attModal.style.display="none"; }
 
 function saveAtt(){
     let obj={
         tgl:attDate.value,
         emp:attEmp.value,
         sts:attStatus.value,
-        late:Number(attLate.value),
-        ot:Number(attOt.value)
+        late:Number(attLate.value||0),
+        ot:Number(attOt.value||0)
     };
+    if(!obj.tgl || !obj.emp) return alert("Tanggal/karyawan belum diisi");
     dataAtt.push(obj);
-    saveAll();
-    closeAttModal();
-    renderAll();
+    saveAll(); closeAttModal(); renderAll();
 }
-
 function delAtt(i){
     if(!confirm("Hapus absensi?")) return;
     dataAtt.splice(i,1);
     saveAll(); renderAll();
 }
 
-// =================================================
-//   PAYROLL
-// =================================================
-let slipNow = null;
+// ===============================
+// PENGGAJIAN + SLIP (STEP 6-7)
+// ===============================
+let slipNow=null;
 
 function runPayroll(){
     let nip = payEmpSelect.value;
     let bln = payMonth.value;
-
     if(!nip || !bln) return alert("Pilih karyawan dan bulan dulu");
 
     let emp = dataEmp.find(e=>e.nip===nip);
-    let gr = dataGrade.find(g=>g.name===emp.grade);
+    if(!emp) return alert("Karyawan tidak ketemu");
 
-    // gather attendance
+    let gr = dataGrade.find(g=>g.name===emp.grade);
+    if(!gr) return alert("Jabatan karyawan belum valid");
+
+    // filter absensi per bulan
     let att = dataAtt.filter(a=>a.emp===nip && a.tgl.startsWith(bln));
 
-    let telat = att.reduce((s,a)=>s + a.late,0);
-    let otjam = att.reduce((s,a)=>s + a.ot,0);
+    let telat = att.reduce((s,a)=>s + (a.late||0),0);
+    let otjam = att.reduce((s,a)=>s + (a.ot||0),0);
     let alpa = att.filter(a=>a.sts==="alpa").length;
 
-    // allowances input
+    // tunjangan input
     let trans = Number(payTransport.value||0);
-    let meal = Number(payMeal.value||0);
+    let meal  = Number(payMeal.value||0);
     let hadir = Number(payAtt.value||0);
-    let otherA = Number(payOtherAllow.value||0);
-    let otherD = Number(payOtherDed.value||0);
+    let otherA= Number(payOtherAllow.value||0);
+    let otherD= Number(payOtherDed.value||0);
 
-    // hitung enterprise style
+    // core gaji
     let basic = gr.basic;
-    let pos = gr.pos;
-    let otPay = otjam * gr.ot;
-    let gross = basic + pos + trans + meal + hadir + otherA + otPay;
+    let tunjJabatan = gr.pos;
+    let lemburPay = otjam * gr.ot;
 
-    // deductions sederhana
-    let bpjs1 = basic * 0.02;
-    let bpjs2 = basic * 0.01;
+    let gross = basic + tunjJabatan + trans + meal + hadir + otherA + lemburPay;
+
+    // potongan enterprise simpel
+    let bpjsTk = basic * 0.02;
+    let bpjsKes= basic * 0.01;
     let telatD = telat * 1000;
-    let alpaD = alpa * 150000;
-
+    let alpaD  = alpa * 150000;
     let pph = (gross > 5000000) ? (gross * 0.05) : 0;
 
-    let totalDed = bpjs1 + bpjs2 + telatD + alpaD + pph + otherD;
+    let totalDed = bpjsTk + bpjsKes + telatD + alpaD + pph + otherD;
     let thp = gross - totalDed;
 
-    slipNow = {
+    slipNow={
         month:bln,
         nip:emp.nip,
         nama:emp.nama,
-        basic, pos, trans, meal, hadir, otherA, otPay,
+        dept:emp.dept,
+        pos:emp.pos,
+        grade:emp.grade,
+        basic,
+        tunjJabatan,
+        trans, meal, hadir, otherA, lemburPay,
+        otjam, telat, alpa,
+        bpjsTk, bpjsKes, pph, telatD, alpaD, otherD,
         gross,
         ded:totalDed,
         take:thp
     };
 
-    renderSlip();
-    slipCard.style.display="block";
+    renderSlipPreview();
+    payPreviewCard.style.display="block";
 }
 
-function renderSlip(){
+function renderSlipPreview(){
     slipBox.innerHTML = `
         <h2>Slip Gaji</h2>
         <div class="row"><b>Nama</b><span>${slipNow.nama}</span></div>
         <div class="row"><b>NIP</b><span>${slipNow.nip}</span></div>
+        <div class="row"><b>Dept/Posisi</b><span>${slipNow.dept} / ${slipNow.pos}</span></div>
+        <div class="row"><b>Jabatan</b><span>${slipNow.grade}</span></div>
         <div class="row"><b>Bulan</b><span>${slipNow.month}</span></div>
         <hr>
         <h3>Pendapatan</h3>
         <div class="row"><span>Gaji Pokok</span><b>${rupiah(slipNow.basic)}</b></div>
-        <div class="row"><span>Tunj. Posisi</span><b>${rupiah(slipNow.pos)}</b></div>
-        <div class="row"><span>Transport</span><b>${rupiah(slipNow.trans)}</b></div>
-        <div class="row"><span>Uang Makan</span><b>${rupiah(slipNow.meal)}</b></div>
+        <div class="row"><span>Tunj. Jabatan</span><b>${rupiah(slipNow.tunjJabatan)}</b></div>
+        <div class="row"><span>Tunj. Transport</span><b>${rupiah(slipNow.trans)}</b></div>
+        <div class="row"><span>Tunj. Makan</span><b>${rupiah(slipNow.meal)}</b></div>
         <div class="row"><span>Tunj. Kehadiran</span><b>${rupiah(slipNow.hadir)}</b></div>
-        <div class="row"><span>OT Pay</span><b>${rupiah(slipNow.otPay)}</b></div>
-        <div class="row"><span>Lainnya</span><b>${rupiah(slipNow.otherA)}</b></div>
+        <div class="row"><span>Lembur (${slipNow.otjam} jam)</span><b>${rupiah(slipNow.lemburPay)}</b></div>
+        <div class="row"><span>Tunjangan Lain</span><b>${rupiah(slipNow.otherA)}</b></div>
         <hr>
         <h3>Potongan</h3>
-        <div class="row"><span>Total Deduction</span><b>${rupiah(slipNow.ded)}</b></div>
+        <div class="row"><span>BPJS TK</span><b>${rupiah(slipNow.bpjsTk)}</b></div>
+        <div class="row"><span>BPJS Kes</span><b>${rupiah(slipNow.bpjsKes)}</b></div>
+        <div class="row"><span>PPh21</span><b>${rupiah(slipNow.pph)}</b></div>
+        <div class="row"><span>Telat (${slipNow.telat} menit)</span><b>${rupiah(slipNow.telatD)}</b></div>
+        <div class="row"><span>Alpa (${slipNow.alpa} hari)</span><b>${rupiah(slipNow.alpaD)}</b></div>
+        <div class="row"><span>Potongan Lain</span><b>${rupiah(slipNow.otherD)}</b></div>
         <hr>
-        <div class="row" style="font-size:18px;"><b>Take Home</b><b>${rupiah(slipNow.take)}</b></div>
+        <div class="row"><b>Gross</b><b>${rupiah(slipNow.gross)}</b></div>
+        <div class="row"><b>Total Potongan</b><b>${rupiah(slipNow.ded)}</b></div>
+        <div class="row" style="font-size:18px;"><b>Take Home Pay</b><b>${rupiah(slipNow.take)}</b></div>
     `;
 }
 
-function exportSlip(){
-    html2pdf().from(slipBox).set({
-        filename:"SlipGaji.pdf",
-        html2canvas:{scale:2}
-    }).save();
+// simpan slip ke list
+function saveSlip(){
+  if(!slipNow) return alert("Belum ada slip dihitung");
+  let exist = dataSlip.find(s=>s.month===slipNow.month && s.nip===slipNow.nip);
+  if(exist){
+    if(!confirm("Slip bulan ini sudah ada, mau overwrite?")) return;
+    Object.assign(exist, slipNow);
+  }else{
+    dataSlip.push(slipNow);
+  }
+  saveAll();
+  fillSlipSelect();
+  renderReports();
+  alert("Slip tersimpan ✅");
 }
 
-// START
+// export pdf (pakai box yang lagi tampil)
+function exportSlip(){
+  let target = slipViewCard.style.display==="none" ? slipBox : slipViewBox;
+  html2pdf().from(target).set({
+      filename:"SlipGaji.pdf",
+      html2canvas:{scale:2}
+  }).save();
+}
+
+// view slip dari menu slip gaji
+function viewSlipFromList(){
+  let idx = slipSelect.value;
+  if(idx==="" || dataSlip.length===0) return;
+
+  let s = dataSlip[Number(idx)];
+  slipViewBox.innerHTML = slipBox.innerHTML = ""; // reset
+
+  // reuse preview renderer
+  slipNow = s;
+  renderSlipPreview();
+
+  // copy preview to view
+  slipViewBox.innerHTML = slipBox.innerHTML;
+  slipViewCard.style.display="block";
+}
+
+// init
 renderAll();
 </script>
 
