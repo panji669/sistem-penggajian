@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Sistem Payroll Enterprise</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<!-- pdf export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+
+<style>
+
+:root{
+    --bg: #0b1220;
+    --bg2: #111827;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --card: rgba(255,255,255,0.06);
+    --line: rgba(255,255,255,0.1);
+    --accent: #2563eb;
+}
+
+/* theme light */
+[data-theme="light"]{
+    --bg: #f6f7fb;
+    --bg2: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+    --card: #ffffff;
+    --line: #d1d5db;
+    --accent: #1d4ed8;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    font-family: "Inter", sans-serif;
+    color:var(--text);
+}
+
+/* top */
+.topbar{
+    height:58px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 15px;
+    background:var(--bg2);
+    border-bottom:1px solid var(--line);
+    position:fixed;
+    left:0; right:0;
+    z-index:10;
+}
+.top-action-btn{
+    border:1px solid var(--line);
+    padding:6px 10px;
+    border-radius:6px;
+    background:transparent;
+    color:var(--text);
+    cursor:pointer;
+}
+
+/* sidebar */
+.sidebar{
+    width:240px;
+    position:fixed;
+    top:58px;
+    bottom:0;
+    left:0;
+    padding:10px;
+    background:var(--bg2);
+    border-right:1px solid var(--line);
+    transition:.3s;
+}
+.sidebar.collapsed{ width:70px; }
+.sidebar .menu-btn{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    background:transparent;
+    color:var(--text);
+    text-align:left;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:6px;
+    cursor:pointer;
+}
+.sidebar .menu-btn:hover,
+.sidebar .menu-btn.active{
+    background:var(--card);
+}
+.sidebar.collapsed .menu-btn span{
+    display:none;
+}
+
+.content{
+    margin-left:240px;
+    padding:75px 15px 20px;
+    transition:.3s;
+}
+.sidebar.collapsed ~ .content{
+    margin-left:70px;
+}
+
+/* cards */
+.card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:15px;
+    margin-bottom:15px;
+}
+
+/* grid */
+.grid{
+    display:grid;
+    gap:10px;
+}
+.grid-2{ grid-template-columns:repeat(2,1fr); }
+.grid-3{ grid-template-columns:repeat(3,1fr); }
+
+/* responsive */
+@media(max-width:800px){
+    .grid-3{ grid-template-columns:1fr; }
+    .grid-2{ grid-template-columns:1fr; }
+}
+
+/* table */
+table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    border:1px solid var(--line);
+    background:var(--card);
+    border-radius:10px;
+    overflow:hidden;
+}
+table th{
+    background:var(--bg2);
+    padding:10px;
+    border-bottom:1px solid var(--line);
+    text-align:left;
+}
+table td{
+    padding:10px;
+    border-bottom:1px solid var(--line);
+}
+
+/* form */
+input,select{
+    width:100%;
+    padding:10px;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--text);
+}
+select option{
+    background:var(--bg2);
+    color:var(--text);
+}
+
+/* buttons */
+.btn{
+    padding:9px 14px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+.btn-primary{ background:var(--accent); color:white; }
+.btn-danger{ background:#dc2626; color:white; }
+.btn-soft{
+    background:var(--bg2);
+    border:1px solid var(--line);
+    color:var(--text);
+}
+
+/* modal */
+.modal-bg{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+}
+.modal-box{
+    background:var(--bg2);
+    width:95%;
+    max-width:500px;
+    padding:15px;
+    border-radius:10px;
+    border:1px solid var(--line);
+}
+
+/* slip */
+.slip{
+    background:white;
+    color:#111827;
+    border-radius:10px;
+    padding:15px;
+    line-height:1.5;
+}
+.slip .row{
+    display:flex;
+    justify-content:space-between;
+}
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     TOP BAR
+     ========================================================= -->
+<div class="topbar">
+    <div style="display:flex;align-items:center;gap:6px;">
+        <i class="bi bi-building" style="color:var(--accent);font-size:20px;"></i>
+        <b>Sistem Payroll Enterprise</b>
+    </div>
+
+    <div style="display:flex;gap:6px;">
+        <button class="top-action-btn" onclick="toggleSidebar()"><i class="bi bi-layout-sidebar"></i></button>
+        <button class="top-action-btn" onclick="switchTheme()"><i class="bi bi-moon-stars"></i></button>
+        <button class="top-action-btn" onclick="resetAll()"><i class="bi bi-trash"></i></button>
+    </div>
+</div>
+
+<!-- =========================================================
+     SIDEBAR
+     ========================================================= -->
+<div class="sidebar" id="sideMenu">
+    <button class="menu-btn active" data-pg="dash" onclick="openPage('dash')">
+        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+    </button>
+    <button class="menu-btn" data-pg="emp" onclick="openPage('emp')">
+        <i class="bi bi-people"></i><span>Karyawan</span>
+    </button>
+    <button class="menu-btn" data-pg="grade" onclick="openPage('grade')">
+        <i class="bi bi-layers"></i><span>Grade / Level</span>
+    </button>
+    <button class="menu-btn" data-pg="att" onclick="openPage('att')">
+        <i class="bi bi-calendar-check"></i><span>Absensi</span>
+    </button>
+    <button class="menu-btn" data-pg="pay" onclick="openPage('pay')">
+        <i class="bi bi-cash-stack"></i><span>Payroll</span>
+    </button>
+    <button class="menu-btn" data-pg="rep" onclick="openPage('rep')">
+        <i class="bi bi-file-text"></i><span>Reports</span>
+    </button>
+</div>
+
+<!-- =========================================================
+     CONTENT
+     ========================================================= -->
+<div class="content">
+
+    <!-- DASHBOARD -->
+    <div id="page_dash" class="page-box">
+        <h2>Dashboard</h2>
+        <div class="grid grid-3">
+            <div class="card">
+                <div class="muted">Total Karyawan</div>
+                <h1 id="statEmp">0</h1>
+            </div>
+            <div class="card">
+                <div class="muted">Total Grade</div>
+                <h1 id="statGrade">0</h1>
+            </div>
+            <div class="card">
+                <div class="muted">Slip Bulan Ini</div>
+                <h1 id="statSlip">0</h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- KARYAWAN -->
+    <div id="page_emp" class="page-box" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h2>Data Karyawan</h2>
+            <button class="btn-primary" onclick="openEmpModal()">+ Karyawan</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>NIP</th><th>Nama</th><th>Dept</th><th>Posisi</th><th>Grade</th><th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="empList"></tbody>
+        </table>
+    </div>
+
+    <!-- GRADE -->
+    <div id="page_grade" class="page-box" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h2>Data Grade</h2>
+            <button class="btn-primary" onclick="openGradeModal()">+ Grade</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Grade</th><th>Gaji Pokok</th><th>Tunj. Posisi</th><th>OT Rate</th><th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="gradeList"></tbody>
+        </table>
+    </div>
+
+    <!-- ABSENSI -->
+    <div id="page_att" class="page-box" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h2>Absensi</h2>
+            <button class="btn-primary" onclick="openAttModal()">+ Absensi</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Tanggal</th><th>Karyawan</th><th>Status</th><th>Telat</th><th>OT</th><th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="attList"></tbody>
+        </table>
+    </div>
+
+    <!-- PAYROLL -->
+    <div id="page_pay" class="page-box" style="display:none;">
+        <h2>Payroll</h2>
+
+        <div class="card grid grid-2">
+            <div>
+                <label>Pilih Karyawan</label>
+                <select id="payEmpSelect"></select>
+            </div>
+            <div>
+                <label>Bulan</label>
+                <input type="month" id="payMonth">
+            </div>
+            <div>
+                <label>Transport</label>
+                <input id="payTransport" type="number" value="300000">
+            </div>
+            <div>
+                <label>Uang Makan</label>
+                <input id="payMeal" type="number" value="400000">
+            </div>
+            <div>
+                <label>Tunj. Kehadiran</label>
+                <input id="payAtt" type="number" value="250000">
+            </div>
+            <div>
+                <label>Tunjangan Lain</label>
+                <input id="payOtherAllow" type="number" value="0">
+            </div>
+            <div>
+                <label>Potongan Lain</label>
+                <input id="payOtherDed" type="number" value="0">
+            </div>
+
+            <div style="display:flex;align-items:flex-end;">
+                <button class="btn-primary" onclick="runPayroll()">Proses</button>
+            </div>
+        </div>
+
+        <div class="card" id="slipCard" style="display:none;">
+            <div style="display:flex;justify-content:space-between;">
+                <h3>Slip Gaji</h3>
+                <button class="btn-primary" onclick="exportSlip()">Export PDF</button>
+            </div>
+            <div id="slipBox" class="slip"></div>
+        </div>
+    </div>
+
+    <!-- REPORT -->
+    <div id="page_rep" class="page-box" style="display:none;">
+        <h2>Reports</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Bulan</th><th>Karyawan</th><th>Gross</th><th>Potongan</th><th>Take Home</th>
+                </tr>
+            </thead>
+            <tbody id="repList"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- =========================================================
+     MODAL KARYAWAN
+     ========================================================= -->
+<div class="modal-bg" id="empModal">
+    <div class="modal-box">
+        <h3 id="empModalTitle">Tambah Karyawan</h3>
+        <label>NIP</label><input id="empNip">
+        <label>Nama</label><input id="empName">
+        <label>Departemen</label><input id="empDept">
+        <label>Posisi</label><input id="empPos">
+        <label>Grade</label><select id="empGrade"></select>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px;gap:6px;">
+            <button class="btn-soft" onclick="closeEmpModal()">Batal</button>
+            <button class="btn-primary" onclick="saveEmp()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================
+     MODAL GRADE
+     ========================================================= -->
+<div class="modal-bg" id="gradeModal">
+    <div class="modal-box">
+        <h3 id="gradeModalTitle">Tambah Grade</h3>
+        <label>Nama Grade</label><input id="grName">
+        <label>Gaji Pokok</label><input id="grBasic" type="number">
+        <label>Tunj. Posisi</label><input id="grPosAllow" type="number">
+        <label>OT Rate</label><input id="grOt" type="number">
+
+        <div style="display:flex;justify-content:flex-end;margin-top:10px;gap:6px;">
+            <button class="btn-soft" onclick="closeGradeModal()">Batal</button>
+            <button class="btn-primary" onclick="saveGrade()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================
+     MODAL ABSENSI
+     ========================================================= -->
+<div class="modal-bg" id="attModal">
+    <div class="modal-box">
+        <h3>Input Absensi</h3>
+        <label>Tanggal</label><input id="attDate" type="date">
+        <label>Karyawan</label><select id="attEmp"></select>
+        <label>Status</label>
+        <select id="attStatus">
+            <option value="hadir">Hadir</option>
+            <option value="izin">Izin</option>
+            <option value="sakit">Sakit</option>
+            <option value="alpa">Alpa</option>
+        </select>
+        <label>Keterlambatan (menit)</label><input id="attLate" type="number" value="0">
+        <label>Lembur (jam)</label><input id="attOt" type="number" value="0">
+        <div style="display:flex;justify-content:flex-end;margin-top:10px;gap:6px;">
+            <button class="btn-soft" onclick="closeAttModal()">Batal</button>
+            <button class="btn-primary" onclick="saveAtt()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================
+     SCRIPT 
+     ========================================================= -->
+<script>
+
+// data dasar
+let dataEmp = JSON.parse(localStorage.getItem("empData") || "[]");
+let dataGrade = JSON.parse(localStorage.getItem("gradeData") || "[]");
+let dataAtt = JSON.parse(localStorage.getItem("attData") || "[]");
+let dataSlip = JSON.parse(localStorage.getItem("slipData") || "[]");
+
+// default grades, kalau kosong
+if(dataGrade.length === 0){
+    dataGrade = [
+        {name:"G1", basic:6000000, pos:1500000, ot:40000},
+        {name:"G2", basic:4500000, pos:1000000, ot:30000},
+        {name:"G3", basic:3500000, pos:700000, ot:25000}
+    ];
+}
+
+// save helper
+function saveAll(){
+    localStorage.setItem("empData", JSON.stringify(dataEmp));
+    localStorage.setItem("gradeData", JSON.stringify(dataGrade));
+    localStorage.setItem("attData", JSON.stringify(dataAtt));
+    localStorage.setItem("slipData", JSON.stringify(dataSlip));
+}
+
+// toggle sidebar
+function toggleSidebar(){
+    document.getElementById("sideMenu").classList.toggle("collapsed");
+}
+
+// theme switch
+function switchTheme(){
+    let th = document.body.getAttribute("data-theme");
+    document.body.setAttribute("data-theme", th === "light" ? "dark" : "light");
+}
+
+// reset system
+function resetAll(){
+    if(!confirm("Reset semua data?")) return;
+    localStorage.clear();
+    location.reload();
+}
+
+// ==================== PAGE =====================
+function openPage(pg){
+    document.querySelectorAll(".menu-btn").forEach(btn=>{
+        btn.classList.remove("active");
+        if(btn.getAttribute("data-pg") === pg){ btn.classList.add("active"); }
+    });
+
+    document.querySelectorAll(".page-box").forEach(p=>p.style.display="none");
+    document.getElementById("page_"+pg).style.display="block";
+
+    // update dashboard saat buka halaman lain
+    renderAll();
+}
+
+// ==================== UTIL =====================
+function rupiah(x){ return "Rp"+(x||0).toLocaleString("id-ID"); }
+
+// =================================================
+//   RENDERING
+// =================================================
+function renderAll(){
+    renderDashboard();
+    renderGrade();
+    renderEmp();
+    renderAbsensi();
+    renderReports();
+    fillPayrollSelect();
+}
+
+function renderDashboard(){
+    statEmp.textContent = dataEmp.length;
+    statGrade.textContent = dataGrade.length;
+
+    let month = new Date().toISOString().slice(0,7);
+    let cnt = dataSlip.filter(s=>s.month===month).length;
+    statSlip.textContent = cnt;
+}
+
+// GRADE list
+function renderGrade(){
+    gradeList.innerHTML = "";
+    dataGrade.forEach((g,i)=>{
+        gradeList.innerHTML += `
+            <tr>
+                <td>${g.name}</td>
+                <td>${rupiah(g.basic)}</td>
+                <td>${rupiah(g.pos)}</td>
+                <td>${rupiah(g.ot)}</td>
+                <td>
+                    <button class="btn-soft" onclick="editGrade(${i})">Edit</button>
+                    <button class="btn-danger" onclick="delGrade(${i})">Hapus</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    // fill select grade
+    empGrade.innerHTML = "";
+    dataGrade.forEach(g=>{
+        empGrade.innerHTML += `<option value="${g.name}">${g.name}</option>`;
+    });
+}
+
+// EMPLOYEES list
+function renderEmp(){
+    empList.innerHTML = "";
+    dataEmp.forEach((e,i)=>{
+        empList.innerHTML += `
+        <tr>
+            <td>${e.nip}</td>
+            <td>${e.nama}</td>
+            <td>${e.dept}</td>
+            <td>${e.pos}</td>
+            <td>${e.grade}</td>
+            <td>
+                <button class="btn-soft" onclick="editEmp(${i})">Edit</button>
+                <button class="btn-danger" onclick="delEmp(${i})">Del</button>
+            </td>
+        </tr>
+        `;
+    });
+}
+
+// ABSENSI
+function renderAbsensi(){
+    attList.innerHTML = "";
+    dataAtt.forEach((a,i)=>{
+        let k = dataEmp.find(x=>x.nip===a.emp);
+        attList.innerHTML += `
+            <tr>
+                <td>${a.tgl}</td>
+                <td>${k ? k.nama : a.emp}</td>
+                <td>${a.sts}</td>
+                <td>${a.late}</td>
+                <td>${a.ot}</td>
+                <td>
+                    <button class="btn-danger" onclick="delAtt(${i})">X</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// REPORT
+function renderReports(){
+    repList.innerHTML = "";
+    dataSlip.forEach((s,i)=>{
+        repList.innerHTML += `
+            <tr>
+                <td>${s.month}</td>
+                <td>${s.nama}</td>
+                <td>${rupiah(s.gross)}</td>
+                <td>${rupiah(s.ded)}</td>
+                <td><b>${rupiah(s.take)}</b></td>
+            </tr>
+        `;
+    });
+}
+
+// payroll dropdown
+function fillPayrollSelect(){
+    payEmpSelect.innerHTML = "";
+    dataEmp.forEach(e=>{
+        payEmpSelect.innerHTML += `<option value="${e.nip}">${e.nama} (${e.nip})</option>`;
+    });
+}
+
+// =================================================
+//   KARYAWAN
+// =================================================
+let editEmpIdx = null;
+
+function openEmpModal(i=null){
+    document.getElementById("empModal").style.display="flex";
+
+    editEmpIdx = i;
+
+    if(i===null){
+        empModalTitle.textContent="Tambah Karyawan";
+        empNip.value=""; empName.value="";
+        empDept.value=""; empPos.value="";
+        empGrade.value = dataGrade[0].name;
+    }else{
+        let e = dataEmp[i];
+        empModalTitle.textContent="Edit Karyawan";
+        empNip.value=e.nip;
+        empName.value=e.nama;
+        empDept.value=e.dept;
+        empPos.value=e.pos;
+        empGrade.value=e.grade;
+    }
+}
+
+function closeEmpModal(){
+    empModal.style.display="none";
+}
+
+function saveEmp(){
+    let obj = {
+        nip:empNip.value,
+        nama:empName.value,
+        dept:empDept.value,
+        pos:empPos.value,
+        grade:empGrade.value
+    };
+
+    if(!obj.nip || !obj.nama) return alert("Lengkapi data");
+
+    if(editEmpIdx===null) dataEmp.push(obj);
+    else dataEmp[editEmpIdx] = obj;
+
+    saveAll();
+    closeEmpModal();
+    renderAll();
+}
+
+function editEmp(i){ openEmpModal(i); }
+function delEmp(i){
+    if(!confirm("Hapus karyawan?")) return;
+    dataEmp.splice(i,1);
+    saveAll(); renderAll();
+}
+
+// =================================================
+//   GRADE
+// =================================================
+let editGradeIdx = null;
+
+function openGradeModal(i=null){
+    document.getElementById("gradeModal").style.display="flex";
+    editGradeIdx = i;
+
+    if(i===null){
+        gradeModalTitle.textContent="Tambah Grade";
+        grName.value=""; grBasic.value="";
+        grPosAllow.value=""; grOt.value="";
+    }else{
+        let g = dataGrade[i];
+        gradeModalTitle.textContent="Edit Grade";
+        grName.value=g.name;
+        grBasic.value=g.basic;
+        grPosAllow.value=g.pos;
+        grOt.value=g.ot;
+    }
+}
+
+function closeGradeModal(){
+    gradeModal.style.display="none";
+}
+
+function saveGrade(){
+    let g={
+        name:grName.value,
+        basic:Number(grBasic.value||0),
+        pos:Number(grPosAllow.value||0),
+        ot:Number(grOt.value||0)
+    };
+
+    if(!g.name) return alert("Nama grade wajib");
+
+    if(editGradeIdx===null) dataGrade.push(g);
+    else dataGrade[editGradeIdx] = g;
+
+    saveAll();
+    closeGradeModal();
+    renderAll();
+}
+
+function editGrade(i){ openGradeModal(i); }
+function delGrade(i){
+    if(!confirm("Hapus grade?")) return;
+    dataGrade.splice(i,1);
+    saveAll(); renderAll();
+}
+
+// =================================================
+//   ABSENSI
+// =================================================
+function openAttModal(){
+    attModal.style.display="flex";
+
+    attDate.valueAsDate = new Date();
+
+    attEmp.innerHTML="";
+    dataEmp.forEach(e=>{
+        attEmp.innerHTML+=`<option value="${e.nip}">${e.nama}</option>`;
+    });
+}
+
+function closeAttModal(){
+    attModal.style.display="none";
+}
+
+function saveAtt(){
+    let obj={
+        tgl:attDate.value,
+        emp:attEmp.value,
+        sts:attStatus.value,
+        late:Number(attLate.value),
+        ot:Number(attOt.value)
+    };
+    dataAtt.push(obj);
+    saveAll();
+    closeAttModal();
+    renderAll();
+}
+
+function delAtt(i){
+    if(!confirm("Hapus absensi?")) return;
+    dataAtt.splice(i,1);
+    saveAll(); renderAll();
+}
+
+// =================================================
+//   PAYROLL
+// =================================================
+let slipNow = null;
+
+function runPayroll(){
+    let nip = payEmpSelect.value;
+    let bln = payMonth.value;
+
+    if(!nip || !bln) return alert("Pilih karyawan dan bulan dulu");
+
+    let emp = dataEmp.find(e=>e.nip===nip);
+    let gr = dataGrade.find(g=>g.name===emp.grade);
+
+    // gather attendance
+    let att = dataAtt.filter(a=>a.emp===nip && a.tgl.startsWith(bln));
+
+    let telat = att.reduce((s,a)=>s + a.late,0);
+    let otjam = att.reduce((s,a)=>s + a.ot,0);
+    let alpa = att.filter(a=>a.sts==="alpa").length;
+
+    // allowances input
+    let trans = Number(payTransport.value||0);
+    let meal = Number(payMeal.value||0);
+    let hadir = Number(payAtt.value||0);
+    let otherA = Number(payOtherAllow.value||0);
+    let otherD = Number(payOtherDed.value||0);
+
+    // hitung enterprise style
+    let basic = gr.basic;
+    let pos = gr.pos;
+    let otPay = otjam * gr.ot;
+    let gross = basic + pos + trans + meal + hadir + otherA + otPay;
+
+    // deductions sederhana
+    let bpjs1 = basic * 0.02;
+    let bpjs2 = basic * 0.01;
+    let telatD = telat * 1000;
+    let alpaD = alpa * 150000;
+
+    let pph = (gross > 5000000) ? (gross * 0.05) : 0;
+
+    let totalDed = bpjs1 + bpjs2 + telatD + alpaD + pph + otherD;
+    let thp = gross - totalDed;
+
+    slipNow = {
+        month:bln,
+        nip:emp.nip,
+        nama:emp.nama,
+        basic, pos, trans, meal, hadir, otherA, otPay,
+        gross,
+        ded:totalDed,
+        take:thp
+    };
+
+    renderSlip();
+    slipCard.style.display="block";
+}
+
+function renderSlip(){
+    slipBox.innerHTML = `
+        <h2>Slip Gaji</h2>
+        <div class="row"><b>Nama</b><span>${slipNow.nama}</span></div>
+        <div class="row"><b>NIP</b><span>${slipNow.nip}</span></div>
+        <div class="row"><b>Bulan</b><span>${slipNow.month}</span></div>
+        <hr>
+        <h3>Pendapatan</h3>
+        <div class="row"><span>Gaji Pokok</span><b>${rupiah(slipNow.basic)}</b></div>
+        <div class="row"><span>Tunj. Posisi</span><b>${rupiah(slipNow.pos)}</b></div>
+        <div class="row"><span>Transport</span><b>${rupiah(slipNow.trans)}</b></div>
+        <div class="row"><span>Uang Makan</span><b>${rupiah(slipNow.meal)}</b></div>
+        <div class="row"><span>Tunj. Kehadiran</span><b>${rupiah(slipNow.hadir)}</b></div>
+        <div class="row"><span>OT Pay</span><b>${rupiah(slipNow.otPay)}</b></div>
+        <div class="row"><span>Lainnya</span><b>${rupiah(slipNow.otherA)}</b></div>
+        <hr>
+        <h3>Potongan</h3>
+        <div class="row"><span>Total Deduction</span><b>${rupiah(slipNow.ded)}</b></div>
+        <hr>
+        <div class="row" style="font-size:18px;"><b>Take Home</b><b>${rupiah(slipNow.take)}</b></div>
+    `;
+}
+
+function exportSlip(){
+    html2pdf().from(slipBox).set({
+        filename:"SlipGaji.pdf",
+        html2canvas:{scale:2}
+    }).save();
+}
+
+// START
+renderAll();
+</script>
+
+</body>
+</html>
